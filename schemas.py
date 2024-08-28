@@ -12,3 +12,6 @@ class UpdatePasswordRequest(BaseModel):
 class UserPackage(BaseModel):
     email: str
     password: str
+
+class UpdateCartRequest(BaseModel):
+    new_cart: str

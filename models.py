@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, DateTime
 from database import Base
 
 class Product(Base):
@@ -15,6 +15,12 @@ class Product(Base):
     quantity = Column(Integer)
     stockQuantity = Column(Integer)
     reviews = Column(Integer)
+    date_created = Column(DateTime)
+    product_details = Column(String)
+    gallery_1 = Column(String)
+    gallery_2 = Column(String)
+    category = Column(String)
+
 
 class Banner(Base):
     __tablename__ = 'product_banner_images'

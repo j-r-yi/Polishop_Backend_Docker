@@ -3,9 +3,13 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
+import asyncio
+import redis.asyncio as redis
+
+
 from database import SessionLocal, engine
 from models import Product, User, Banner
-from schemas import UserSchema, UpdatePasswordRequest, UserPackage
+from schemas import UserSchema, UpdatePasswordRequest, UserPackage, UpdateCartRequest
 
 app = FastAPI()
 
@@ -46,27 +50,35 @@ def read_all_products(db: Session = Depends(get_db)):
             "quantity": product.quantity,
             "stockQuantity": product.stockQuantity,
             "reviews": product.reviews,
+            "date_created": product.date_created,
+            "product_details": product.product_details,
+            "gallery_1": product.gallery_1,
+            "gallery_2": product.gallery_2,
         }
         for product in all_products
     ]
 
 @app.get("/products/{productId}", response_model=dict)
 def read_item(productId: int, db: Session = Depends(get_db)):
-    db_item = db.query(Product).filter(Product.productId == productId).first()
-    if db_item is None:
+    product = db.query(Product).filter(Product.productId == productId).first()
+    if product is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return {
-        "productid": db_item.productId,
-        "img": db_item.img,
-        "productname": db_item.name,
-        "price": db_item.price,
-        "color": db_item.color,
-        "discount": db_item.discount,
-        "description": db_item.description,
-        "rating": db_item.rating,
-        "quantity": db_item.quantity,
-        "stockQuantity": db_item.stockQuantity,
-        "reviews": db_item.reviews,
+        "productId": product.productId,
+        "img": product.img,
+        "productname": product.name,
+        "price": product.price,
+        "color": product.color,
+        "discount": product.discount,
+        "description": product.description,
+        "rating": product.rating,
+        "quantity": product.quantity,
+        "stockQuantity": product.stockQuantity,
+        "reviews": product.reviews,
+        "date_created": product.date_created,
+        "product_details": product.product_details,
+        "gallery_1": product.gallery_1,
+        "gallery_2": product.gallery_2,
     }
 
 @app.get("/banners", response_model=List[dict])
@@ -81,6 +93,28 @@ def read_banners(db: Session = Depends(get_db)):
         }
         for banner in all_banners
     ]
+
+@app.get("/search/{search_term}", response_model=List[dict])
+def search_products(search_term: str, db: Session = Depends(get_db)):
+    all_products = db.query(Product).filter(Product.name.ilike(f"%{search_term}%")).all()
+    return [
+        {
+            "productId": product.productId,
+            "img": product.img,
+            "productname": product.name,
+            "price": product.price,
+            "color": product.color,
+            "discount": product.discount,
+            "description": product.description,
+            "rating": product.rating,
+            "quantity": product.quantity,
+            "stockQuantity": product.stockQuantity,
+            "reviews": product.reviews,
+            "date_created": product.date_created
+        }
+        for product in all_products
+    ]
+
 
 @app.get("/users", response_model=List[dict])
 def read_all_users(db: Session = Depends(get_db)):
@@ -162,4 +196,34 @@ def user_login(user_data: UserPackage, db: Session = Depends(get_db)):
             return{"Error": "Password is incorrect"}
         return {"username": db_user.username, "email": db_user.email, "cart": db_user.cart}
 
-    
+
+@app.put("/logout/{username}")
+def update_password(username: str, cart_update_request: UpdateCartRequest, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == username).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="Username not found")
+    updated_cart = cart_update_request.new_cart
+    db_user.cart= updated_cart
+    db.commit()
+    return {"message": f"Logout Successful! Cart also updated successfully for user {username}"}
+
+
+
+
+
+
+
+
+
+
+async def get_redis():
+    redis_client = await redis.from_url("redis://127.0.1:6379")
+    return redis_client
+
+@app.get("/redis/{key}")
+async def sms(key: str, redis: redis.Redis = Depends(get_redis)):
+    data = await redis.get(key)
+    if data:
+        return {"data": data.decode()}
+    else:
+        return {"data": "no data"}
