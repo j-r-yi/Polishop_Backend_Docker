@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
-import asyncio
-import redis.asyncio as redis
+# import asyncio
+# import redis.asyncio as redis
 
 
 from database import SessionLocal, engine
@@ -32,6 +32,10 @@ def get_db():
 def read_root():
     return {"Hello": "World"}
 
+
+#######################################################################################################
+## PRODUCT RELATED
+
 @app.get("/products", response_model=List[dict])
 def read_all_products(db: Session = Depends(get_db)):
     all_products = db.query(Product).all()
@@ -54,6 +58,8 @@ def read_all_products(db: Session = Depends(get_db)):
             "product_details": product.product_details,
             "gallery_1": product.gallery_1,
             "gallery_2": product.gallery_2,
+            "category": product.category,
+            "subcategory": product.subcategory
         }
         for product in all_products
     ]
@@ -79,6 +85,9 @@ def read_item(productId: int, db: Session = Depends(get_db)):
         "product_details": product.product_details,
         "gallery_1": product.gallery_1,
         "gallery_2": product.gallery_2,
+        "category": product.category,
+        "subcategory": product.subcategory
+
     }
 
 @app.get("/banners", response_model=List[dict])
@@ -96,7 +105,7 @@ def read_banners(db: Session = Depends(get_db)):
 
 @app.get("/search/{search_term}", response_model=List[dict])
 def search_products(search_term: str, db: Session = Depends(get_db)):
-    all_products = db.query(Product).filter(Product.name.ilike(f"%{search_term}%")).all()
+    all_products = db.query(Product).filter(Product.name.ilike(f"%{search_term}%")).limit(8).all()
     return [
         {
             "productId": product.productId,
@@ -110,11 +119,30 @@ def search_products(search_term: str, db: Session = Depends(get_db)):
             "quantity": product.quantity,
             "stockQuantity": product.stockQuantity,
             "reviews": product.reviews,
-            "date_created": product.date_created
+            "date_created": product.date_created,
+            "product_details": product.product_details,
+            "gallery_1": product.gallery_1,
+            "gallery_2": product.gallery_2,
+            "category": product.category,
+            "subcategory": product.subcategory
+
         }
         for product in all_products
     ]
 
+
+@app.get("/category", response_model=List[dict])
+def read_categories(db: Session = Depends(get_db)):
+    all_categories = db.query(Product.category.distinct()).all()
+    category_list = []
+    for category in all_categories:
+        sub_categories = db.query(Product.subcategory).filter_by(category=category[0]).distinct().all()
+        category_dict = {'category': category[0], 'subcategories':[subcategory[0] for subcategory in sub_categories]}
+        category_list.append(category_dict)
+    return category_list
+
+#######################################################################################################
+## USER RELATED
 
 @app.get("/users", response_model=List[dict])
 def read_all_users(db: Session = Depends(get_db)):
@@ -216,14 +244,14 @@ def update_password(username: str, cart_update_request: UpdateCartRequest, db: S
 
 
 
-async def get_redis():
-    redis_client = await redis.from_url("redis://127.0.1:6379")
-    return redis_client
+# async def get_redis():
+#     redis_client = await redis.from_url("redis://127.0.1:6379")
+#     return redis_client
 
-@app.get("/redis/{key}")
-async def sms(key: str, redis: redis.Redis = Depends(get_redis)):
-    data = await redis.get(key)
-    if data:
-        return {"data": data.decode()}
-    else:
-        return {"data": "no data"}
+# @app.get("/redis/{key}")
+# async def sms(key: str, redis: redis.Redis = Depends(get_redis)):
+#     data = await redis.get(key)
+#     if data:
+#         return {"data": data.decode()}
+#     else:
+#         return {"data": "no data"}

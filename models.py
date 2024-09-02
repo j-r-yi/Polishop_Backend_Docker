@@ -20,6 +20,7 @@ class Product(Base):
     gallery_1 = Column(String)
     gallery_2 = Column(String)
     category = Column(String)
+    subcategory = Column(String)
 
 
 class Banner(Base):
