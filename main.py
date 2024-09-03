@@ -141,6 +141,33 @@ def read_categories(db: Session = Depends(get_db)):
         category_list.append(category_dict)
     return category_list
 
+@app.get("/category/{search_category}", response_model=List[dict])
+def search_category(search_category: str, db: Session = Depends(get_db)):
+    all_products = db.query(Product).filter(Product.subcategory == search_category).limit(10).all()
+    return [
+        {
+            "productId": product.productId,
+            "img": product.img,
+            "productname": product.name,
+            "price": product.price,
+            "color": product.color,
+            "discount": product.discount,
+            "description": product.description,
+            "rating": product.rating,
+            "quantity": product.quantity,
+            "stockQuantity": product.stockQuantity,
+            "reviews": product.reviews,
+            "date_created": product.date_created,
+            "product_details": product.product_details,
+            "gallery_1": product.gallery_1,
+            "gallery_2": product.gallery_2,
+            "category": product.category,
+            "subcategory": product.subcategory
+
+        }
+        for product in all_products
+    ]
+
 #######################################################################################################
 ## USER RELATED
 
