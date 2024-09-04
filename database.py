@@ -5,8 +5,8 @@ from sqlalchemy.orm import sessionmaker
 import pymysql
 pymysql.install_as_MySQLdb()
 
-DATABASE_URL = "mysql://root:joshua123@localhost/polishop"
-# DATABASE_URL = "mysql://root:Joshua123!@localhost:3306/polishop"
+# DATABASE_URL = "mysql://root:joshua123@localhost/polishop"
+DATABASE_URL = "mysql://root:Joshua123!@localhost:3306/polishop"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
