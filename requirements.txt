@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+asyncpg  # For PostgreSQL, replace with your preferred database driver
+pymysql
+cryptography
