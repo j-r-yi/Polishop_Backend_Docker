@@ -9,7 +9,7 @@ from typing import List
 
 from database import SessionLocal, engine
 from models import Product, User, Banner
-from schemas import UserSchema, UpdatePasswordRequest, UserPackage, UpdateCartRequest
+from schemas import UserSchema, UpdatePasswordRequest, UserPackage, UpdateCartRequest, ProductSchema
 
 app = FastAPI()
 
@@ -264,8 +264,51 @@ def update_password(username: str, cart_update_request: UpdateCartRequest, db: S
 
 
 
+# Simulating Large Amount of Products Added at Once
+@app.post("/product/add", response_model=dict)
+def create_product(product: ProductSchema, db: Session = Depends(get_db)):
+    existing_product = db.query(Product).filter(
+        Product.name == product.name,
+        Product.category == product.category
+    ).first()
 
+    if existing_product:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Product '{product.name}' in category '{product.category}' already exists."
+        )
 
+    # Create and add the new product to the database
+    new_product = Product(
+        img=product.img,
+        name=product.name,
+        price=product.price,
+        # color=product.color,
+        discount=product.discount,
+        description=product.description,
+        # rating=product.rating,
+        quantity=product.quantity,
+        # stockQuantity=product.stockQuantity,
+        # reviews=product.reviews,
+        # date_created=product.date_created,
+        product_details=product.product_details,
+        gallery_1=product.gallery_1,
+        gallery_2=product.gallery_2,
+        category=product.category,
+        subcategory=product.subcategory,
+    )
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product)
+
+    return {
+        "message": "Product added successfully",
+        "product": {
+            "productId": new_product.productId,
+            "name": new_product.name,
+            "category": new_product.category
+        }
+    }
 
 
 

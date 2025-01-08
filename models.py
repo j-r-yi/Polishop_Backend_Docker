@@ -4,7 +4,7 @@ from database import Base
 class Product(Base):
     __tablename__ = 'products'
 
-    productId = Column(Integer, primary_key=True, index=True)
+    productId = Column(Integer, primary_key=True, autoincrement=True, index=True)
     img = Column(String(255))
     name = Column(String(255))
     price = Column(Float) 

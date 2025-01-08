@@ -1,4 +1,7 @@
 from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
+
 
 class UserSchema(BaseModel):
     username: str
@@ -15,3 +18,21 @@ class UserPackage(BaseModel):
 
 class UpdateCartRequest(BaseModel):
     new_cart: str
+
+class ProductSchema(BaseModel):
+    img: Optional[str]
+    name: str
+    price: float
+    # color: Optional[str]
+    discount: Optional[float]
+    description: Optional[str]
+    # rating: Optional[float]
+    quantity: Optional[int]
+    # stockQuantity: Optional[int]
+    # reviews: Optional[int]
+    # date_created: Optional[datetime]
+    product_details: Optional[str]
+    gallery_1: Optional[str]
+    gallery_2: Optional[str]
+    category: str
+    subcategory: str
