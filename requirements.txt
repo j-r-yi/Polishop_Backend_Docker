@@ -4,3 +4,6 @@ sqlalchemy
 asyncpg  # For PostgreSQL, replace with your preferred database driver
 pymysql
 cryptography
+confluent-kafka
+kafka-python==2.0.2
+
