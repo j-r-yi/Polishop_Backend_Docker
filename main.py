@@ -10,7 +10,7 @@ import json
 from database import SessionLocal, engine
 from models import Product, User, Banner
 from schemas import UserSchema, UpdatePasswordRequest, UserPackage, UpdateCartRequest, ProductSchema
-from productproducer import delivery_report, send_to_kafka
+# from productproducer import delivery_report, send_to_kafka
 
 app = FastAPI()
 
@@ -273,8 +273,11 @@ def update_password(username: str, cart_update_request: UpdateCartRequest, db: S
 # Simulating Large Amount of Products Added at Once
 @app.post("/product/add", response_model=dict)
 def create_product(product: ProductSchema, db: Session = Depends(get_db)):
+    '''
     product_data = product.dict()
     send_to_kafka(product_data) # Publish to kafka
+    '''
+
     return{"message": "Product submitted to Kafka"}
 
 

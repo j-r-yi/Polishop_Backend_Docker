@@ -1,9 +1,55 @@
 from confluent_kafka import Consumer
+from kafka import KafkaConsumer
 from sqlalchemy.orm import Session
 from models import Product
 from database import get_db
 import json
 
+
+
+
+
+TOPIC_NAME = "demo_topic"
+BROKER = "localhost:9092"
+
+def create_consumer():
+    return KafkaConsumer(
+        TOPIC_NAME,
+        bootstrap_servers=BROKER,
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
+        group_id="demo-group",
+        value_deserializer=lambda x: json.loads(x.decode('utf-8'))
+    )
+
+def consume_messages(consumer):
+    print("Listening for messages...")
+    for message in consumer:
+        print(f"Consumed: {message.value}")
+
+if __name__ == "__main__":
+    consumer = create_consumer()
+    consume_messages(consumer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+# "productconsumer.py" listens to the product topic, processes incoming data, and stores in db
 
 KAFKA_BROKER = "kafka:9092"
 KAFKA_TOPIC = "products"
@@ -12,7 +58,7 @@ KAFKA_TOPIC = "products"
 consumer = Consumer({
     "bootstrap.servers": KAFKA_BROKER,
     "group.id": "product-consumer-group",
-    "auto.offset.reset": "earliest"
+    "auto.offset.reset": "latest"
 })
 consumer.subscribe([KAFKA_TOPIC])
 
@@ -35,11 +81,10 @@ def process_messages():
                     print("Received product data from Kafka:")
                     print(json.dumps(product_data, indent=4))
 
-                    '''
                     # Check if product already exists in the database
                     existing_product = db.query(Product).filter(
-                        Product.name == product.name,
-                        Product.category == product.category
+                        Product.name == product_data.name,
+                        Product.category == product_data.category
                     ).first()
 
                     if existing_product:
@@ -68,7 +113,7 @@ def process_messages():
                     db.commit()
                     db.refresh(new_product)
                     print(f"Stored product: {product_data['name']} in MySQL")
-                    '''
+                    
                 except Exception as e:
                     # db.rollback()
                     print(f"Error storing product: {e}")
@@ -85,7 +130,7 @@ def process_messages():
 if __name__ == "__main__":
     process_messages()
 
-
+'''
 
 # def create_product(product: ProductSchema, db: Session = Depends(get_db)):
 #     existing_product = db.query(Product).filter(
