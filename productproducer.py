@@ -3,30 +3,6 @@ import json
 from kafka import KafkaProducer
 import time
 
-TOPIC_NAME = "demo_topic"
-BROKER = "localhost:9092"
-
-def create_producer():
-    return KafkaProducer(
-        bootstrap_servers=BROKER,
-        value_serializer=lambda v: json.dumps(v).encode('utf-8')
-    )
-
-def produce_messages(producer):
-    for i in range(10):
-        message = {"id": i, "message": f"Hello Kafka! Message {i}"}
-        producer.send(TOPIC_NAME, message)
-        print(f"Produced: {message}")
-        time.sleep(1)  # Sleep to simulate delay
-
-if __name__ == "__main__":
-    producer = create_producer()
-    produce_messages(producer)
-    producer.close()
-
-
-
-'''
 # "productproducer.py" sends product to Kafka topic called products
 
 # Kafka Config
@@ -59,4 +35,3 @@ def send_to_kafka(product_data: dict):
     # Error handling
     except Exception as e:
         print(f"Error Sending To Kafka: {e}")
-'''
