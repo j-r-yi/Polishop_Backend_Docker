@@ -14,7 +14,7 @@ KAFKA_TOPIC = "products"
 consumer = Consumer({
     "bootstrap.servers": KAFKA_BROKER,
     "group.id": "product-consumer-group",
-    "auto.offset.reset": "latest"
+    "auto.offset.reset": "earliest"
 })
 consumer.subscribe([KAFKA_TOPIC])
 
